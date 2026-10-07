@@ -23,7 +23,7 @@ This project was developed by a Senior QA professional with a strong functional-
 | Driver | UiAutomator2 8.7.0 |
 | Selenium | Used through the Appium client (`WebDriverWait`, `expected_conditions`) |
 | Device communication | ADB (Android platform-tools) |
-| Device under test | Samsung Galaxy A33 (SM-A336M), Android 16, One UI — physical device, selected via the `UDID` capability |
+| Device under test | Samsung Galaxy A33 (SM-A336M), Android 16, One UI — physical device, selected via the `udid` capability loaded from the local (gitignored) `config.json` |
 | App under test | Native Android Settings (`com.android.settings`) |
 
 > Emulators are not part of the verified setup. All results reported here were produced on the physical Samsung device only.
@@ -32,7 +32,7 @@ This project was developed by a Senior QA professional with a strong functional-
 
 The script runs a linear session against a locally running Appium server:
 
-1. Build `UiAutomator2Options` (platform, device, `UDID`, `noReset`, `forceAppLaunch`, package/activity) and open a session against `http://127.0.0.1:4723`.
+1. Build `UiAutomator2Options` (platform, device serial loaded from the local `config.json`, `noReset`, `forceAppLaunch`, package/activity) and open a session against `http://127.0.0.1:4723`.
 2. Apply a **clean-start block**: force-stop the leftover search package (`com.android.settings.intelligence`), then activate Settings so every run begins on the Settings homepage.
 3. Locate the search button through an ordered fallback chain of locators, tap it.
 4. Locate the search field through a second ordered fallback chain, type `batería`.
@@ -95,9 +95,25 @@ adb devices
 
 The output must list exactly one device with state `device`. Any other state (`unauthorized`, `offline`, empty list) must be resolved before running the test.
 
-### 4. Device targeting
+### 4. Device targeting (local config, never committed)
 
-The script targets the connected device through the `UDID` capability set in the `CONFIGURATION` section of `test_mi_app.py`. Copy the value from your own `adb devices` output — do not hardcode someone else's device ID.
+The physical device serial is **not** hardcoded in the script. It lives in a local `config.json` next to the script, which is listed in the repository's `.gitignore`, so it can never be pushed to GitHub:
+
+1. Copy the template to a local file:
+
+   ```bash
+   copy config.example.json config.json
+   ```
+
+2. Open `config.json` and set your own serial from `adb devices`:
+
+   ```json
+   { "udid": "R58M1234567" }
+   ```
+
+3. If `config.json` is missing, the script fails fast with a clear message telling you exactly what to create. If `udid` is `null`, Appium picks the only connected device.
+
+Anyone cloning the repository repeats these three steps with their own device — your serial never needs to touch GitHub.
 
 ## Project Structure
 
@@ -105,6 +121,7 @@ The script targets the connected device through the `UDID` capability set in the
 01 System apps practice/
 ├── test_mi_app.py        # Test script: session setup, clean start, locator fallback
 │                         # chains, search flow, screenshot evidence, teardown
+├── config.example.json   # Device-config template (copy to config.json)
 ├── evidence_test.png     # Evidence: screen captured on test success
 ├── evidence_error.png    # Evidence: screen captured at the moment of a failure
 ├── AGENTS.md             # Project context: environment, device, selector rules
@@ -132,7 +149,7 @@ Formal QA artifact describing the single implemented test case.
 - [ ] The `uiautomator2` driver is installed.
 - [ ] The physical device is connected, authorized, and `adb devices` reports state `device`.
 - [ ] The device screen is on and unlocked.
-- [ ] The `UDID` capability in `test_mi_app.py` matches the connected device.
+- [ ] A local `config.json` exists (copied from `config.example.json`) with the `udid` of the connected device.
 - [ ] `Appium-Python-Client` is installed in the active Python environment.
 
 ### Steps
@@ -299,7 +316,7 @@ No result in this repository is reported without a real run on the physical devi
 | Symptom | Check |
 |---------|-------|
 | Connection refused / session never starts | The Appium server must be running: start it with `appium` and confirm it listens on `http://127.0.0.1:4723`. |
-| Device not found / `udid` errors | Run `adb devices` and confirm the device appears with state `device` (not `unauthorized` or `offline`), and that the `UDID` capability matches it. |
+| Device not found / `udid` errors | Run `adb devices` and confirm the device appears with state `device` (not `unauthorized` or `offline`), and that `config.json` (copied from `config.example.json`) holds the matching serial. |
 | Test fails on the first locator | The device screen must be **on and unlocked** — a locked or off screen prevents the UI from being rendered and located. |
 | App "opens" but the test fails immediately on a system app | Confirm `appium:forceAppLaunch=true` is set together with `noReset=true` (see Finding 1). |
 | Locators time out after a device or OS update | Re-verify the page source: One UI may have changed the widget class, `content-desc`, or resource-id. Update the **first** element of the fallback chain. |

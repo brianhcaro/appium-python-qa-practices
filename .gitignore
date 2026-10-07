@@ -15,3 +15,7 @@ desktop.ini
 .idea/
 .vscode/
 *.swp
+
+# Local device configuration (holds the physical phone's UDID serial) must
+# never be committed:
+config.json

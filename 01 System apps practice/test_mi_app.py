@@ -8,9 +8,13 @@ Before running it:
 3. Connect your phone by USB (with USB debugging) or start an emulator.
 4. Run: adb devices
    You must see at least one device with state "device".
-5. Fill in the variables in the CONFIGURATION section below.
+5. Create the local config file: copy config.example.json to config.json
+   and put your own serial from "adb devices" in the "udid" field.
 6. Run this file: python test_mi_app.py
 """
+
+# Imports "json" to read the local config file (device UDID).
+import json
 
 # Imports the "time" module so we can wait a few seconds if needed.
 import time
@@ -46,11 +50,12 @@ APPIUM_SERVER_URL = "http://127.0.0.1:4723"
 # Physical phone: you can put "My Pixel" or whatever model you like.
 DEVICE_NAME = "SM-A336M"
 
-# UDID: unique identifier you see with the command: adb devices
-# Typical emulator: "emulator-5554"
-# Physical phone: a serial like "R58M30XXXX" or "ABCDEF123456"
-# If you leave None, Appium will use the first device it finds (useful if there is only one).
-UDID = None  # Put your own serial from "adb devices" here; None = Appium picks the only connected device
+# Local runtime configuration file, excluded from git (see the repository's
+# .gitignore): it holds the physical device's UDID serial, so the value never
+# lands on GitHub. Copy config.example.json to config.json and set your own
+# serial from "adb devices" (or leave it null to let Appium pick the only
+# connected device).
+CONFIG_FILE = "config.json"
 
 # Android version (optional but useful). Example: "14", "13", "12".
 # You see it in Settings > About phone, or with: adb shell getprop ro.build.version.release
@@ -72,6 +77,24 @@ APP_ACTIVITY = ".Settings"
 APP_APK_PATH = None
 
 
+def load_config():
+    """Loads runtime configuration from config.json (next to this script).
+
+    Keeps device-specific secrets like the UDID serial out of the repository:
+    the file is listed in .gitignore, so it is never committed to GitHub.
+    Copy config.example.json to config.json and set your own values.
+    """
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), CONFIG_FILE)
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(
+            f"Missing local config file: {config_path}. Copy config.example.json "
+            'to config.json and set your own UDID, e.g. {"udid": "R58M1234567"}. '
+            "Configuration is intentionally not committed to git."
+        )
+    with open(config_path, "r", encoding="utf-8") as config_file:
+        return json.load(config_file)
+
+
 def build_android_options():
     """Builds the Desired Capabilities / Options for Android (physical device or emulator)."""
 
@@ -87,10 +110,13 @@ def build_android_options():
     # deviceName: device label. Appium 2 requires it, but the actual device is chosen by UDID.
     options.device_name = DEVICE_NAME
 
-    # If you defined a UDID, we pass it along so the session targets THAT phone or emulator.
-    if UDID:
+    # Device serial comes from the local config.json (gitignored), so the
+    # physical device ID never lands on GitHub. If the config value is null,
+    # Appium picks the only connected device (useful when there is only one).
+    udid = load_config().get("udid")
+    if udid:
         # udid: the exact serial from "adb devices". Essential if you have more than one device.
-        options.udid = UDID
+        options.udid = udid
 
     # If you defined the Android version, we add it (it helps Appium validate the environment).
     if PLATFORM_VERSION:

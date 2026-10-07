@@ -11,9 +11,10 @@
 
 ## Hardware & Environment
 * **Physical Test Device:** Connected Samsung Device (Validated via ADB).
-* **Device ID (udid):** `<your serial from \`adb devices\`>`
+* **Device ID (udid):** Loaded at runtime from the local `config.json` (gitignored — never commit the real serial). Template: `config.example.json`.
 * **Platform:** Android
 
 ## Error History & Selector Strategy
 * **Samsung One UI Exception:** Standard Android resource IDs for search bars are modified by Samsung's custom UI layer.
 * **Mandatory Coding Rule:** Do not hardcode vanilla Android resource IDs. Always implement robust locator strategies (e.g., `AppiumBy.ACCESSIBILITY_ID`, text-based XPaths, or try/except self-healing blocks) to handle device-specific UI variations.
+* **Secrets Rule:** Never hardcode or commit the device serial (udid). Read it at runtime from the gitignored local `config.json` (template: `config.example.json`).
