@@ -6,6 +6,8 @@
 * **Primary Technology:** Appium (Client v3+) with UIAutomator2 driver for Android.
 * **Target Audience:** International recruiters and global engineering teams. All code, documentation, variable names, and comments MUST be in English.
 * **User Level:** 6 years of experience in Manual QA. Strong functional testing logic, transitioning to advanced test automation.
+* **Conversation Language:** English. All replies, code, documentation, variable names, comments, and commit messages MUST be in English.
+* **Allowed Spanish Exceptions:** only device-bound literals in the test code (e.g., locator `"Buscar en Configuración"`, search query `"batería"`, XPath fragment `"uscar"`), always accompanied by English comments explaining why they cannot be translated.
 
 ## Hardware & Environment
 * **Physical Test Device:** Connected Samsung Device (Validated via ADB).
