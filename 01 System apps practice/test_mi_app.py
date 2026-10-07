@@ -50,7 +50,7 @@ DEVICE_NAME = "SM-A336M"
 # Typical emulator: "emulator-5554"
 # Physical phone: a serial like "R58M30XXXX" or "ABCDEF123456"
 # If you leave None, Appium will use the first device it finds (useful if there is only one).
-UDID = "RFCT60KD57Y"  # Your Galaxy A33 (already verified with adb devices)
+UDID = None  # Put your own serial from "adb devices" here; None = Appium picks the only connected device
 
 # Android version (optional but useful). Example: "14", "13", "12".
 # You see it in Settings > About phone, or with: adb shell getprop ro.build.version.release

@@ -9,7 +9,7 @@
 
 ## Hardware & Environment
 * **Physical Test Device:** Connected Samsung Device (Validated via ADB).
-* **Device ID (udid):** `RFCT60KD57Y`
+* **Device ID (udid):** `<your serial from \`adb devices\`>`
 * **Platform:** Android
 
 ## Error History & Selector Strategy
